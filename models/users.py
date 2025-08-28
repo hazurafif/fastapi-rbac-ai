@@ -101,5 +101,19 @@ class UsersTable:
                 role=role_name,
                 permissions=permissions
             )
+    
+    def authenticate_user(self, email: str, password: str) -> Optional[UserModel]:
+        with get_db() as db:
+            user = db.query(User).filter(User.email == email).first()
+            if not user:
+                return None
+
+            if not bcrypt.verify(password, user.password_hash):
+                return None
+           
+            return UserModel(
+                name=user.name,
+                email=user.email,
+            )
         
 Users = UsersTable()
