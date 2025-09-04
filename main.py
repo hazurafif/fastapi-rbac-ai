@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timedelta, timezone
 from models.users import (
@@ -34,7 +34,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 @app.post("/login")
-async def login(login: LoginModel):
+async def login(response: Response, login: LoginModel):
     user = Users.authenticate_user(login.email, login.password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -42,7 +42,16 @@ async def login(login: LoginModel):
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.name}, expires_delta=access_token_expires
-    )    
+    ) 
+     # Set the cookie token
+    response.set_cookie(
+        key="token",
+        value=access_token,
+        expires=access_token_expires,
+        httponly=True,  # Ensures the cookie is not accessible via JavaScript
+        samesite='lax',
+        secure='lax',
+    )
     return {
         "token": access_token,
             
