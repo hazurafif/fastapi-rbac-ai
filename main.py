@@ -6,7 +6,8 @@ from models.users import (
     Users
 )
 from routers import (
-    users
+    users,
+    generations
 )
 import logging
 import jwt
@@ -68,3 +69,4 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
+app.include_router(generations.router, prefix="/api/v1/generations", tags=["generations"])
